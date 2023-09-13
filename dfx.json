@@ -1,0 +1,29 @@
+{
+  "canisters": {
+    "invoice_backend": {
+      "main": "src/invoice_backend/main.mo",
+      "type": "motoko"
+    },
+    "invoice_frontend": {
+      "dependencies": [
+        "invoice_backend"
+      ],
+      "frontend": {
+        "entrypoint": "src/invoice_frontend/src/index.html"
+      },
+      "source": [
+        "src/invoice_frontend/assets",
+        "dist/invoice_frontend/"
+      ],
+      "type": "assets"
+    }
+  },
+  "defaults": {
+    "build": {
+      "args": "",
+      "packtool": ""
+    }
+  },
+  "output_env_file": ".env",
+  "version": 1
+}
