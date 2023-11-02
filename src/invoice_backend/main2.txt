@@ -1,0 +1,516 @@
+import Debug "mo:base/Debug";
+import Text "mo:base/Text";
+import Bool "mo:base/Bool";
+import Map "mo:base/HashMap";
+import Error "mo:base/Error";
+import List "mo:base/List";
+import Iter "mo:base/Iter";
+import HashMap "mo:base/HashMap";
+import Principal "mo:base/Principal";
+import Option "mo:base/Option";
+import Time "mo:base/Time";
+import Array "mo:base/Array";
+
+actor Invoice {
+  type Track = {
+    subject : Text;
+    status : Text;
+    msg_id : Text;
+    to : Text;
+    api_key_id : Text;
+    events : Text;
+  };
+
+ type Invoice = {
+    Type : Text;
+    InvoiceId : Text;
+    VendorId : Text;
+    MongoId : Text;
+    CreationDate : Text;
+    VendorEmail : Text;
+    Action : Text;
+    Ack : Bool;
+    Finance : Bool;
+    FinancingDetails : [Text];
+    VendorEmailHash : Text;
+    VendorMobileNumberHash : Text;
+    VendorMobileNumber : Text;
+    ClientFristName : Text;
+    ClientLastName : Text;
+    VendorName : Text;
+    ClientEmail : Text;
+    ClientMobileNumber : Text;
+    Currency : Text;
+    FundReception : Text;
+    Lines : Text;
+    NetAmt : Text;
+    Paid : Bool;
+    Rejected : Bool;
+    Voided : Bool;
+    Draft : Bool;
+    SentInvoiceDeleted : Bool;
+    ReceivedInvoiceDeleted : Bool;
+    TimeStamp : Text;
+    PreviousInvoiceHash : Text;
+    TxnHash : Text;
+    DueDate : Text;
+    DeleteComments : Text;
+    PaymentConfirmation : Bool;
+    Tracking  : Track;
+  };
+  type QueryResult = {
+    key : Text;
+    record : ?Invoice;
+  };
+  type TrackList = {
+    finance_id : Text;
+    initiated : Bool;
+    rejected : Bool;
+    approved : Bool;
+    disbursed : Bool;
+    repayment : Bool;
+  };
+  type Defaulter = {
+    date : Text;
+    default : Bool;
+    remarks : Text;
+  };
+
+  private stable var mapEntries : [(Text, Invoice)] = [];
+  var map = Map.HashMap<Text, Invoice>(0, Text.equal, Text.hash);
+
+
+
+
+
+
+
+
+
+
+  public func CreateInvoice(mongoid:Text,invoiceid:Text,) : async () {
+    // map.put(invoice.MongoId, invoice);
+  };
+
+
+
+
+
+
+
+
+
+
+  public query func QueryInvoice(id : Text) : async ?Invoice {
+    // Debug.print(debug_show (map.get(id)));
+    map.get(id);
+
+  };
+
+  public func AckInvoice(mongoID : Text, timeStamp : Text, action1 : Text, txnHash : Text) : async Bool {
+    let getInvoice = await QueryInvoice(mongoID);
+
+    switch (getInvoice) {
+      case (?getInvoice) {
+        let updatedInvoice = {
+          getInvoice with
+          ack = false;
+          timestamp = timeStamp;
+          action = action1;
+          txn_hash = txnHash;
+        };
+
+        // Update the invoice in the map.
+        // Debug.print(debug_show (updatedInvoice));
+
+        let updatedMap = map.put(mongoID, updatedInvoice);
+        // Debug.print(debug_show (updatedMap));
+        return true;
+      };
+      case (null) {
+        // Invoice not found, return false.
+        return false;
+      };
+    };
+  };
+
+  func updateInvoice(id : Text) : async ?Invoice {
+    let getInvoice = await QueryInvoice(id);
+    return getInvoice;
+  };
+
+  //   public func SetDefaultInvoice(
+  //     mongoID : Text,
+  //     timeStamp : Text,
+  //     remarks : Text,
+  //     status : Bool,
+  //     action : Text,
+  //     txnHash : Text,
+  //   ) : async Bool {
+  //     let maybeInvoice = await QueryInvoice(mongoID);
+
+  //     switch (maybeInvoice) {
+  //       case (?invoice) {
+  //         let invoice = Option.unwrap(maybeInvoice);
+  //         let financedetail = invoice.financing_details;
+
+  //         let layout = "%Y-%m-%dT%H:%M:%S.000Z";
+
+  //         // Parse the date string into a Unix timestamp (milliseconds since the epoch).
+  //         // let date = Time.fromMillisecondsSinceUnixEpoch(
+  //         //   Time.toMilliseconds(Text.toDate(layout, invoice.due_date))
+  //         // );
+
+  //         let currentTime = Time.now();
+
+  //         // if (
+  //         //   not (Time.isBefore(date, currentTime)) and
+  //         //   not financedetail[Array.length(financedetail) - 1].repayment
+  //         // ) {
+  //         //   return false;
+  //         // };
+
+  //         if (
+  //           invoice.finance and
+  //           // financedetail[Array.length(financedetail) - 1].approved and
+  //           // financedetail[Array.length(financedetail) - 1].disbursed and
+  //           // not financedetail[Array.length(financedetail) - 1].repayment and
+  //           // not financedetail[Array.length(financedetail) - 1].rejected and
+  //           // Time.isBefore(date, currentTime) and
+  //           status,
+  //         ) {
+  //           // if (Array.length(invoice.default_details) != 0) {
+  //           //   if (invoice.default_details[Array.length(invoice.default_details) - 1].default) {
+  //           //     return false;
+  //           //   }
+  //           // };
+  //           let updatedInvoice = {
+  //             invoice with
+  //             // default_details = Array.append(invoice.default_details, {
+  //             //   date = timeStamp;
+  //             //   default = status;
+  //             //   remarks = remarks;
+  //             // });
+  //             action = action;
+  //             txn_hash = txnHash;
+  //           };
+  //           // InvoiceMap.put(updatedInvoice.mongo_id, Text.toJSON(updatedInvoice));
+  //           return true;
+  //         } else if (
+  //           invoice.finance and
+  //           // financedetail[Array.length(financedetail) - 1].approved and
+  //           // financedetail[Array.length(financedetail) - 1].disbursed and
+  //           // financedetail[Array.length(financedetail) - 1].repayment and
+  //           // not financedetail[Array.length(financedetail) - 1].rejected and
+  //           // Time.isBefore(date, currentTime) and
+  //           not status,
+  //         ) {
+  //           // if (Array.length(invoice.default_details) != 0) {
+  //           //   if (not invoice.default_details[Array.length(invoice.default_details) - 1].default) {
+  //           //     return false;
+  //           //   }
+  //           // };
+  //           let updatedInvoice = {
+  //             invoice with
+  //             // default_details = Array.append(invoice.default_details, {
+  //             //   date = timeStamp;
+  //             //   default = status;
+  //             //   remarks = remarks;
+  //             // });
+  //             action = action;
+  //             txn_hash = txnHash;
+  //           };
+  //           // InvoiceMap.put(updatedInvoice.mongo_id, Text.toJSON(updatedInvoice));
+  //           return true;
+  //         } else {
+  //           return false;
+  //         };
+  //       };
+  //       case (null) {
+  //         return false;
+  //       };
+  //     };
+  //   };
+
+  public func PaidInvoice(
+    mongoID : Text,
+    timeStamp : Text,
+    action : Text,
+    txnHash : Text,
+  ) : async Bool {
+    let getInvoice = await QueryInvoice(mongoID);
+
+    switch (getInvoice) {
+      case (?getInvoice) {
+        let updatedInvoice = {
+          getInvoice with
+          ack = true;
+          paid = true;
+          timestamp = timeStamp;
+          action = action;
+          txn_hash = txnHash;
+        };
+        map.put(mongoID, updatedInvoice);
+        return true;
+      };
+      case (null) {
+        return false;
+      };
+    };
+  };
+
+  public func RejectInvoice(
+    mongoID : Text,
+    timeStamp : Text,
+    action : Text,
+    txnHash : Text,
+  ) : async Bool {
+    let getInvoice = await QueryInvoice(mongoID);
+
+    switch (getInvoice) {
+      case (?getInvoice) {
+        let updatedInvoice = {
+          getInvoice with
+          rejected = true;
+          timestamp = timeStamp;
+          action = action;
+          txn_hash = txnHash;
+        };
+        map.put(updatedInvoice.mongo_id, updatedInvoice);
+        return true;
+      };
+      case (null) {
+        return false;
+      };
+    };
+  };
+
+  public func VoidedInvoice(
+    mongoID : Text,
+    timeStamp : Text,
+    action : Text,
+    txnHash : Text,
+  ) : async Bool {
+    let getInvoice = await QueryInvoice(mongoID);
+
+    switch (getInvoice) {
+      case (?getInvoice) {
+        let updatedInvoice = {
+          getInvoice with
+          voided = true;
+          timestamp = timeStamp;
+          action = action;
+          txn_hash = txnHash;
+        };
+        map.put(updatedInvoice.mongo_id, updatedInvoice);
+        return true;
+      };
+      case (null) {
+        return false;
+      };
+    };
+  };
+
+
+  public func ExtendInvoiceDueDate(
+    mongoID : Text,
+    timeStamp : Text,
+    dueDate : Text,
+    action : Text,
+    txnHash : Text,
+  ) : async Bool {
+    let getInvoice = await QueryInvoice(mongoID);
+
+    switch (getInvoice) {
+      case (?getInvoice) {
+        let updatedInvoice = {
+          getInvoice with
+          due_date = dueDate;
+          timestamp = timeStamp;
+          action = action;
+          txn_hash = txnHash;
+        };
+        map.put(updatedInvoice.mongo_id, updatedInvoice);
+        return true;
+      };
+      case (null) {
+        return false;
+      };
+    };
+  };
+
+  public func DeleteInvoice(
+    mongoID : Text,
+    sentDelete : Bool,
+    receiveDelete : Bool,
+    deletecomment : Text,
+    txnHash : Text,
+  ) : async Bool {
+    let getInvoice = await QueryInvoice(mongoID);
+
+    switch (getInvoice) {
+      case (?getInvoice) {
+        let updatedInvoice = {
+
+          getInvoice with
+          sent_invoice_deleted = sentDelete;
+          received_invoice_deleted = receiveDelete;
+          delete_comments = deletecomment;
+          txn_hash = txnHash;
+        };
+        map.put(updatedInvoice.mongo_id, updatedInvoice);
+        return true;
+      };
+      //  case (_) {
+
+      //   let postRes : ?Invoice = map.get(mongoID);
+      //           ignore map.remove(mongoID);
+      //   //6. Return Success.
+      //           return true;
+      //       };
+      case (null) {
+        return false;
+      };
+    };
+  };
+
+  public func PaymentConfirmationInvoice(
+    mongoID : Text,
+    timeStamp : Text,
+    action : Text,
+    txnHash : Text,
+  ) : async Bool {
+    let getInvoice = await QueryInvoice(mongoID);
+
+    switch (getInvoice) {
+      case (?getInvoice) {
+        let updatedInvoice = {
+          getInvoice with
+          payment_confirmation = true;
+          timestamp = timeStamp;
+          action = action;
+          txn_hsash = txnHash;
+        };
+        map.put(updatedInvoice.mongo_id, updatedInvoice);
+        return true;
+      };
+      case (null) {
+        return false;
+      };
+    };
+  };
+
+  public func DraftInvoice(
+    mongoID : Text,
+    timeStamp : Text,
+    action : Text,
+    txnHash : Text,
+  ) : async Bool {
+    let getInvoice = await QueryInvoice(mongoID);
+
+    switch (getInvoice) {
+      case (?getInvoice) {
+        let updatedInvoice = {
+          getInvoice with
+          draft = false;
+          timestamp = timeStamp;
+          action = action;
+          txn_hash = txnHash;
+        };
+        map.put(updatedInvoice.mongo_id, updatedInvoice);
+        return true;
+      };
+      case (null) {
+        return false;
+      };
+    };
+  };
+
+  public func UpdateInvoiceTracking(
+    mongoID : Text,
+    subject : Text,
+    status : Text,
+    msgID : Text,
+    apiKeyID : Text,
+    track : Text,
+    to : Text,
+    txnHash : Text,
+  ) : async Bool {
+    let getInvoice = await QueryInvoice(mongoID);
+
+    switch (getInvoice) {
+      case (?getInvoice) {
+        let updatedTracking = {
+          subject = subject;
+          status = status;
+          msg_id = msgID;
+          to = to;
+          api_key_id = apiKeyID;
+          events = track;
+        };
+
+        let updatedInvoice = {
+          getInvoice with
+          tracking = updatedTracking;
+          txn_hash = txnHash;
+        };
+
+        map.put(updatedInvoice.mongo_id, updatedInvoice);
+        return true;
+      };
+      case (null) {
+        return false;
+      };
+    };
+  };
+
+  public query func readAllInvoices() : async [(Text, Invoice)] {
+    //1. authenticate
+
+    //2. Hashmap to Iter.
+    let postsIter : Iter.Iter<(Text, Invoice)> = map.entries();
+
+    //3. Iter to Array.
+    let postsArray : [(Text, Invoice)] = Iter.toArray(postsIter);
+    //4. Iter to Array.
+    postsArray;
+  };
+
+  public query func QueryInvoicesByVendorEmailHash(emailHash : Text) : async Bool {
+    // : async (Text, Invoice)
+    for (invoice in map.entries()) {
+      if (invoice.1.vendor_email_hash == emailHash) {
+        Debug.print(debug_show (map.get(emailHash)));
+
+        // result := result.append(invoice.1);
+      };
+    };
+
+    return true;
+  };
+  public query func QueryInvoicesByVendorMobileNumber(vendorNumber : Text) : async Bool {
+    // : async (Text, Invoice)
+    for (invoice in map.entries()) {
+      if (invoice.1.vendor_mobile_number == vendorNumber) {
+        Debug.print(debug_show (map.get(invoice.1.vendor_mobile_number)));
+        // result := result.append(invoice.1);
+      };
+    };
+
+    return true;
+  };
+ 
+  // public func TrackListString(track : TrackList) : async Text {
+  //   // return "FinanceId: " # track.finance_id # ", Initiated: " # Text.fromBool(track.initiated) # ", Rejected: " # Text.fromBool(track.rejected) # ", Approved: " # Text.fromBool(track.approved) # ", Disbursed: " # Text.fromBool(track.disbursed) # ", Repayment: " # Text.fromBool(track.repayment);
+  //   return "hello";
+  // };
+
+  system func preupgrade() {
+    mapEntries := Iter.toArray(map.entries());
+  };
+  system func postupgrade() {
+    map := HashMap.fromIter<Text, Invoice>(mapEntries.vals(), 1, Text.equal, Text.hash);
+
+  };
+
+};
