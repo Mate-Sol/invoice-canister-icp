@@ -73,6 +73,7 @@ actor Invoice {
     var history = Map.HashMap<Text, Buffer.Buffer<Invoice>>(0, Text.equal, Text.hash);
 
     public func CreateInvoice(mongoid : Text, invoiceid : Text, creationDate : Text, vendoremail : Text, vendormobilenumber : Text, clientFname : Text, clientLname : Text, vendorname : Text, clientemail : Text, clientmobilenumber : Text, currency : Text, fundreception : Text, lines : Text, netAMT : Text, txnHash : Text, vendoremailhash : Text, vendormobileHash : Text, action : Text, dueDate : Text, vendorId : Text) : async Text {
+        let array = Buffer.fromArray<Text>([]);
 
         switch (map.get(mongoid)) {
             case (null) {
@@ -86,7 +87,7 @@ actor Invoice {
                     Action = action;
                     Ack = false;
                     Finance = false;
-                    FinancingDetails = [""];
+                    FinancingDetails = Buffer.toArray(array);
                     VendorEmailHash = vendoremailhash;
                     VendorMobileNumberHash = vendormobileHash;
                     VendorMobileNumber = vendormobilenumber;
@@ -430,7 +431,7 @@ actor Invoice {
 
                         };
                     };
-                    return "invoice acknowledge";
+                    return "invoice finance request initiated";
                 } else if (value.Ack == true and value.Finance == true and value.Paid == false and value.Rejected == false and value.Voided == false and value.PaymentConfirmation == false) {
                     let array = Buffer.fromArray<Text>(value.FinancingDetails);
                     array.add(financeid);
@@ -451,7 +452,7 @@ actor Invoice {
                         };
                         case (null) {};
                     };
-                    return "invoice acknowledge";
+                    return "invoice finance request initiated";
                 } else {
                     return Text.concat("request falied,current invoice status = ", value.Action);
                 };
