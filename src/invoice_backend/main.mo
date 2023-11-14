@@ -37,7 +37,7 @@ actor Invoice {
         VendorEmailHash : Text;
         VendorMobileNumberHash : Text;
         VendorMobileNumber : Text;
-        ClientFristName : Text;
+        ClientFirstName : Text;
         ClientLastName : Text;
         VendorName : Text;
         ClientEmail : Text;
@@ -91,7 +91,7 @@ actor Invoice {
                     VendorEmailHash = vendoremailhash;
                     VendorMobileNumberHash = vendormobileHash;
                     VendorMobileNumber = vendormobilenumber;
-                    ClientFristName = clientFname;
+                    ClientFirstName = clientFname;
                     ClientLastName = clientLname;
                     VendorName = vendorname;
                     ClientEmail = clientemail;
