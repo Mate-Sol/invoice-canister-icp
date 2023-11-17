@@ -72,7 +72,7 @@ actor Invoice {
     private stable var historyEntries : [(Text, [Invoice])] = [];
     var history = Map.HashMap<Text, Buffer.Buffer<Invoice>>(0, Text.equal, Text.hash);
 
-    public func CreateInvoice(mongoid : Text, invoiceid : Text, creationDate : Text, vendoremail : Text, vendormobilenumber : Text, clientFname : Text, clientLname : Text, vendorname : Text, clientemail : Text, clientmobilenumber : Text, currency : Text, fundreception : Text, lines : Text, netAMT : Text, txnHash : Text, vendoremailhash : Text, vendormobileHash : Text, action : Text, dueDate : Text, vendorId : Text,Times:Int) : async Text {
+    public func CreateInvoice(mongoid : Text, invoiceid : Text, creationDate : Text, vendoremail : Text, vendormobilenumber : Text, clientFname : Text, clientLname : Text, vendorname : Text, clientemail : Text, clientmobilenumber : Text, currency : Text, fundreception : Text, lines : Text, netAMT : Text, txnHash : Text, vendoremailhash : Text, vendormobileHash : Text, action : Text, dueDate : Text, vendorId : Text, Times : Int) : async Text {
         let array = Buffer.fromArray<Text>([]);
 
         switch (map.get(mongoid)) {
@@ -137,7 +137,7 @@ actor Invoice {
         map.get(id);
     };
 
-    public func AckInvoice(mongoId : Text, action : Text, txnHash : Text,Times:Int) : async Text {
+    public func AckInvoice(mongoId : Text, action : Text, txnHash : Text, Times : Int) : async Text {
         switch (map.get(mongoId)) {
             case (?value) {
                 if (value.Ack == false and value.Finance == false and value.Paid == false and value.Rejected == false and value.Voided == false and value.PaymentConfirmation == false) {
@@ -168,7 +168,7 @@ actor Invoice {
         };
     };
 
-    public func PaidInvoice(mongoId : Text, action : Text, txnHash : Text,Times:Int) : async Text {
+    public func PaidInvoice(mongoId : Text, action : Text, txnHash : Text, Times : Int) : async Text {
         switch (map.get(mongoId)) {
             case (?value) {
                 if (value.Finance == false and value.Paid == false and value.Rejected == false and value.Voided == false and value.PaymentConfirmation == false) {
@@ -200,7 +200,7 @@ actor Invoice {
         };
     };
 
-    public func RejectInvoice(mongoId : Text, action : Text, txnHash : Text,Times:Int) : async Text {
+    public func RejectInvoice(mongoId : Text, action : Text, txnHash : Text, Times : Int) : async Text {
         switch (map.get(mongoId)) {
             case (?value) {
                 if (value.Finance == false and value.Paid == false and value.Rejected == false and value.Voided == false and value.PaymentConfirmation == false) {
@@ -231,7 +231,7 @@ actor Invoice {
         };
     };
 
-    public func VoidedInvoice(mongoId : Text, action : Text, txnHash : Text,Times:Int) : async Text {
+    public func VoidedInvoice(mongoId : Text, action : Text, txnHash : Text, Times : Int) : async Text {
         switch (map.get(mongoId)) {
             case (?value) {
                 if (value.Finance == false and value.Paid == false and value.Rejected == false and value.Voided == false and value.PaymentConfirmation == false) {
@@ -262,10 +262,12 @@ actor Invoice {
         };
     };
 
-    public func PaymentConfirmationInvoice(mongoId : Text, action : Text, txnHash : Text,Times:Int) : async Text {
+    public func PaymentConfirmationInvoice(mongoId : Text, action : Text, txnHash : Text, Times : Int) : async Text {
         switch (map.get(mongoId)) {
             case (?value) {
-                if (value.Ack == true and value.Rejected == false and value.Voided == false and value.PaymentConfirmation == false) {
+                // if (value.Ack == true and value.Rejected == false and value.Voided == false and value.PaymentConfirmation == false) {
+                if (value.Rejected == false and value.Voided == false and value.PaymentConfirmation == false) {
+
                     let updatedInvoice = {
                         value with
                         Paid = true;
@@ -368,7 +370,7 @@ actor Invoice {
         return Buffer.toArray<Invoice>(b);
     };
 
-    public func DeleteInvoice(mongoId : Text, sentDelete : Bool, recieveDelete : Bool, deleteComments : Text, txnHash : Text,Times:Int) : async Text {
+    public func DeleteInvoice(mongoId : Text, sentDelete : Bool, recieveDelete : Bool, deleteComments : Text, txnHash : Text, Times : Int) : async Text {
 
         let res : ?Invoice = map.get(mongoId);
 
@@ -407,7 +409,7 @@ actor Invoice {
     };
 
     // create finance invoice
-    public func FinanceInvoice(mongoId : Text, financeid : Text, action : Text, txnHash : Text,Times:Int) : async Text {
+    public func FinanceInvoice(mongoId : Text, financeid : Text, action : Text, txnHash : Text, Times : Int) : async Text {
         switch (map.get(mongoId)) {
             case (?value) {
                 if (value.Ack == true and value.Finance == false and value.Paid == false and value.Rejected == false and value.Voided == false and value.PaymentConfirmation == false) {
