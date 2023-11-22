@@ -346,6 +346,22 @@ actor Invoice {
 
     };
 
+    public query func queryByTxHash(hash : Text) : async [Invoice] {
+
+        let Entries = Iter.toArray(history.entries());
+        let array = Buffer.fromArray<Invoice>([]);
+        for (x in Iter.fromArray(Entries)) {
+            let data : [Invoice] = Buffer.toArray<Invoice>(x.1);
+            for (x in Iter.fromArray(data)) {
+                if (x.TxnHash == hash) {
+                    array.add(x);
+                };
+            };
+        };
+
+        return Buffer.toArray<Invoice>(array);
+    };
+
     public query func QueryInvoicesByVendorEmailHash(emailHash : Text) : async [Invoice] {
         var b = Buffer.Buffer<Invoice>(2);
 
@@ -358,6 +374,7 @@ actor Invoice {
         return Buffer.toArray<Invoice>(b);
 
     };
+
     public query func QueryInvoicesByVendorMobileNumber(vendorNumber : Text) : async [Invoice] {
         var b = Buffer.Buffer<Invoice>(2);
 
